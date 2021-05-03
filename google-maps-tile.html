@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+    <style>
+    /* styles */
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      width: 100vw;
+      height: 100vh;
+    }
+    </style>
+  </head>
+  <body>
+
+    <div id="map"></div>
+
+    <script>
+    var TILE_URL = 'https://api.nearmap.com/tiles/v3/Vert/{z}/{x}/{y}.jpeg?apikey=Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz&tertiary=satellite';
+
+    var map;
+    var mapEl;
+    var layer;
+    var layerID = 'Nearmap Tile API';
+
+    window.initMap = function() {
+      // Select the element with id="map".
+      mapEl = document.querySelector('#map');
+      
+      // Create a new map.
+      map = new google.maps.Map(mapEl, {
+        center: new google.maps.LatLng(30.267610, -97.740180),
+        zoom: 21
+      });
+      
+      // Create a tile layer, configured to fetch tiles from TILE_URL.
+      layer = new google.maps.ImageMapType({
+        name: layerID,
+        getTileUrl: function(coord, zoom) {
+          console.log(coord);
+          var url = TILE_URL
+            .replace('{x}', coord.x)
+            .replace('{y}', coord.y)
+            .replace('{z}', zoom);
+          return url;
+        },
+        tileSize: new google.maps.Size(256, 256),
+        minZoom: 1,
+        maxZoom: 21
+      });
+      
+      // Apply the new tile layer to the map.
+      map.mapTypes.set(layerID, layer);
+      map.setMapTypeId(layerID);
+    };
+    </script>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyAvBhAqWr2AE2AR_DxkvbravXpXoQrZUXA"></script>
+    
+  </body>
+</html>
