@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html style="width: 100%; height: 100%;">
+  <head>
+    <title>OpenLayers Nearmap Adavanced Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- polyfills for old browsers -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,Promise,fetch,Array.prototype.filter,Array.prototype.some,Array.prototype.find,Array.prototype.findIndex,Array.prototype.map"></script>
+
+    <!--
+      OpenLayers cdn distributable from:
+      https://openlayers.org/en/latest/doc/quickstart.html
+    -->
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.1.1/build/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.1.1/css/ol.css" type="text/css">
+
+    <!-- map controls styling -->
+    <style>
+      #map {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+
+      .heading-btn {
+        position: absolute;
+        bottom: 100px;
+        justify-content: space-around;
+      }
+
+      .heading-btn .center {
+        display: flex;
+        justify-content: center;
+      }
+      .heading-btn button {
+        margin: 10px;
+      }
+
+      .survey-picker {
+        position: absolute;
+        bottom: 10px;
+        display: flex;
+        background: #e9e9e9;
+        justify-content: space-around;
+        padding: 5px;
+      }
+
+      .survey-picker > div {
+        margin-right: 20px;
+      }
+
+      .survey-picker select{
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+    <div class="heading-btn" >
+      <div class="center"><button id="northElementId" value="North">North</button></div>
+      <div>
+        <button id="westElementId" value="West">West</button>
+        <button id="vertElementId" value="Vert">Vertical</button>
+        <button id="eastElementId" value="East">East</button>
+      </div>
+      <div class="center"><button id="southElementId" value="South">South</button></div>
+    </div>
+    <div class="survey-picker">
+      <div>
+        <span>Available surveys</span>
+        <select></select>
+      </div>
+      <div >
+        <span>Selected</span>
+        <div id="selectedSurveyElementId"></div>
+      </div>
+      <div >
+        <span>Displayed</span>
+        <div id="displayedSurveyElementId"></div>
+      </div>
+    </div>
+
+    <!-- Nearmap js files - import order is important -->
+    <script src="config.js"></script>
+    <script src="url.js"></script>
+    <script src="math.js"></script>
+    <script src="projections.js"></script>
+    <script src="loader.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>
