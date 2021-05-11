@@ -1,4 +1,4 @@
-# nearmap-sample-code
+# Nearmap Sample Code
 Collection of sample code to use with Nearmap content
 
 ## arcgis
