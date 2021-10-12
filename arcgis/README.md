@@ -10,4 +10,3 @@ Test & Interact with these Samples Live on CodePin:
   - [Nearmap Tiles API | ArcGIS JavaScript SDK 3.36 (2D Only)](https://codepen.io/geoffhtaylor3d/pen/MWvYZXM)
 - WMS API:
   - [Nearmap WMS API | ArcGIS JavaScript SDK 4.21 (2D + 3D)](https://codepen.io/geoffhtaylor3d/pen/XWgGRGp)
-  - 
