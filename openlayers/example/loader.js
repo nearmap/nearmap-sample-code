@@ -20,7 +20,7 @@ function fetchImageData(url) {
 
 function loadImage(data) {
   return new Promise(function(resolve) {
-    var img = document.createElement('img');
+    const img = document.createElement('img');
     img.addEventListener('load',function() { resolve(img); });
     // Falling back to an empty image in case of any errors
     img.addEventListener('error', function() { resolve(img); });
@@ -31,7 +31,7 @@ function loadImage(data) {
 }
 
 function rotateImage(ctx, img, tileWidth, tileHeight, heading) {
-  var rotation = degreesToRadians(heading);
+  const rotation = degreesToRadians(heading);
 
   ctx.save();
 
@@ -53,7 +53,7 @@ function rotateImage(ctx, img, tileWidth, tileHeight, heading) {
 }
 
 function createCanvas(width, height) {
-  var canvas = document.createElement('canvas');
+  const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
 
@@ -61,11 +61,11 @@ function createCanvas(width, height) {
 }
 
 function rotateTile(data, tileDims, heading) {
-  var tileWidth = tileDims[0];
-  var tileHeight = tileDims[1];
-  var canvasAndCtx = createCanvas(tileWidth, tileHeight);
-  var canvas = canvasAndCtx[0];
-  var ctx = canvasAndCtx[1];
+  const tileWidth = tileDims[0];
+  const tileHeight = tileDims[1];
+  const canvasAndCtx = createCanvas(tileWidth, tileHeight);
+  const canvas = canvasAndCtx[0];
+  const ctx = canvasAndCtx[1];
 
   return loadImage(data)
     .then(function(img) {

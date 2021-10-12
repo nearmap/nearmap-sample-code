@@ -25,8 +25,8 @@ Below you'll find a complete working example showcasing OpenLayers with Nearmap 
     <div id="map" style="position:absolute; top:0; right: 0; bottom: 0; left:0;"></div>
 
     <script type="text/javascript">
-      var API_KEY = 'YOUR_API_KEY';
-      var map = new ol.Map({
+      const API_KEY = 'YOUR_API_KEY';
+      const map = new ol.Map({
         target: 'map',
         layers: [
           new ol.layer.Tile({
