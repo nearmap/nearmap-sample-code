@@ -1,102 +1,113 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
-    <title>Web tiled</title>
-    <link rel="stylesheet" href="https://js.arcgis.com/3.36/dijit/themes/nihilo/nihilo.css">
-    <link rel="stylesheet" href="https://js.arcgis.com/3.36/esri/css/esri.css">
-    <style>
-      html, body, #map {
-        height: 100%; width: 100%;
-        margin: 0; padding: 0;
-      }
-      body{
-        background-color: #fff; overflow:hidden;
-        font-family: sans-serif;
-      }
-      #header {
-        padding: 4px 15px 4px 0;
-        background-color: #F2F2EC;
-        color: #575757;
-        font-size: 16pt;
-        text-align: right;
-        font-weight: bold;
-        height:55px;
-      }
-      #subheader {
-        color: #575757;
-        font-size: small;
-        padding: 5px 0 0 0;
-        text-align: right;
-      }
-      #subheader a { color: #575757; }
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+  <title>Web tiled</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/3.36/dijit/themes/nihilo/nihilo.css">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.36/esri/css/esri.css">
+  <style>
+    html, body, #map {
+      height: 100%; width: 100%;
+      margin: 0; padding: 0;
+    }
+    body{
+      background-color: #fff; overflow:hidden;
+      font-family: sans-serif;
+    }
+    #header {
+      padding: 4px 15px 4px 0;
+      background-color: #F2F2EC;
+      color: #575757;
+      font-size: 16pt;
+      text-align: right;
+      font-weight: bold;
+      height:55px;
+    }
+    #subheader {
+      color: #575757;
+      font-size: small;
+      padding: 5px 0 0 0;
+      text-align: right;
+    }
+    #subheader a { color: #575757; }
 
-      .ds { background: #000; overflow: hidden; position: absolute; z-index: 2; }
-      #ds-h div { width: 100%; }
-      #ds .o1 { filter: alpha(opacity=10); opacity: .1; }
-      #ds .o2 { filter: alpha(opacity=8); opacity: .08; }
-      #ds .o3 { filter: alpha(opacity=6); opacity: .06; }
-      #ds .o4 { filter: alpha(opacity=4); opacity: .04; }
-      #ds .o5 { filter: alpha(opacity=2); opacity: .02; }
-      #ds .h1 { height: 1px; }
-      #ds .h2 { height: 2px; }
-      #ds .h3 { height: 3px; }
-      #ds .h4 { height: 4px; }
-      #ds .h5 { height: 5px; }
-    </style>
+    .ds { background: #000; overflow: hidden; position: absolute; z-index: 2; }
+    #ds-h div { width: 100%; }
+    #ds .o1 { filter: alpha(opacity=10); opacity: .1; }
+    #ds .o2 { filter: alpha(opacity=8); opacity: .08; }
+    #ds .o3 { filter: alpha(opacity=6); opacity: .06; }
+    #ds .o4 { filter: alpha(opacity=4); opacity: .04; }
+    #ds .o5 { filter: alpha(opacity=2); opacity: .02; }
+    #ds .h1 { height: 1px; }
+    #ds .h2 { height: 2px; }
+    #ds .h3 { height: 3px; }
+    #ds .h4 { height: 4px; }
+    #ds .h5 { height: 5px; }
+  </style>
 
-    <script src="https://js.arcgis.com/3.36/"></script>
-    <script>
-      var map;
-      require([
-        "esri/map", "esri/layers/WebTiledLayer", "dojo/parser",
+  <script src="https://js.arcgis.com/3.28/"></script>
+  <script>
 
-        "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dojo/domReady!"
-      ], function(
-        Map, WebTiledLayer, parser
-      ) {
-        parser.parse();
+    require(["esri/map", "esri/layers/WebTiledLayer", "dojo/parser"
+    ], function(Map, WebTiledLayer, parser
+    ) {
+      parser.parse();
 
-        map = new Map("map", {
-            center: [-97.740180, 30.267610], // Austin, TX
-            zoom: 21
-        });
+      ///////////////
+      // User Input Parameters
+      ///////////////
 
-        var cycleMap = new WebTiledLayer("https://api.nearmap.com/tiles/v3/Vert/{level}/{col}/{row}.jpeg?apikey=Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz", {
-          "copyright": 'Maps © <a href="https://nearmap.com">Nearmap</a>',
-        });
-        map.addLayer(cycleMap);
+      const api_key = "Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz"  // Nearmap API Key Goes Here
+      const min_zoom = 16  // Furthest zoom level the user can view
+      const max_zoom = 20  // Closest zoom level the user can view
+      const start_zoom = 17  // Starting Zoom level for the Web Map
+      const lat_lon = [-97.740180, 30.267610], // [Lat, Lon] for Location: ex: Austin, TX
+
+              map = new Map("map", {
+                center: lat_lon,
+                zoom: start_zoom,
+                minZoom: min_zoom,
+                maxZoom: max_zoom-1,
+                basemap: "topo-vector"
+              });
+
+      // TODO: Assess zoom levels https://docs.nearmap.com/pages/viewpage.action?pageId=11206698
+      const cycleMap = new WebTiledLayer(`https://api.nearmap.com/tiles/v3/Vert/{level}/{col}/{row}.img?apikey=${api_key}`, {
+        "copyright": 'Maps © <a href="https://nearmap.com">Nearmap</a>',
+        displayLevels: Array.from(Array(max_zoom+1).keys()), // Nearmap Tile Allowed Zoom Levels
       });
-    </script>
-  </head>
-  <body class="nihilo">
-    <div id="mainWindow"
-         data-dojo-type="dijit/layout/BorderContainer"
-         data-dojo-props="design:'headline',gutters:false"
-         style="width: 100%; height: 100%; margin: 0;">
-      <div id="header"
-           data-dojo-type="dijit/layout/ContentPane"
-           data-dojo-props="region:'top'">
-        Nearmap Tile API Example
+      map.addLayer(cycleMap);
+    });
+  </script>
+</head>
+<body class="nihilo">
+<div id="mainWindow"
+     data-dojo-type="dijit/layout/BorderContainer"
+     data-dojo-props="design:'headline',gutters:false"
+     style="width: 100%; height: 100%; margin: 0;">
+  <div id="header"
+       data-dojo-type="dijit/layout/ContentPane"
+       data-dojo-props="region:'top'">
+    Nearmap Tile API Example
 
-      </div>
-      <div id="map" class="shadow"
-           data-dojo-type="dijit/layout/ContentPane"
-           data-dojo-props="region:'center'">
+  </div>
+  <div id="map" class="shadow"
+       data-dojo-type="dijit/layout/ContentPane"
+       data-dojo-props="region:'center'">
 
 
-        <div id="ds">
-          <div id="ds-h">
-            <div class="ds h1 o1"></div>
-            <div class="ds h2 o2"></div>
-            <div class="ds h3 o3"></div>
-            <div class="ds h4 o4"></div>
-            <div class="ds h5 o5"></div>
-          </div>
-        </div>
-
+    <div id="ds">
+      <div id="ds-h">
+        <div class="ds h1 o1"></div>
+        <div class="ds h2 o2"></div>
+        <div class="ds h3 o3"></div>
+        <div class="ds h4 o4"></div>
+        <div class="ds h5 o5"></div>
       </div>
     </div>
-  </body>
+
+  </div>
+</div>
+</body>
 </html>
