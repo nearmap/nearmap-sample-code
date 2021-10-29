@@ -49,28 +49,31 @@
   <script src="https://js.arcgis.com/3.28/"></script>
   <script>
 
-    require(["esri/map", "esri/layers/WebTiledLayer", "dojo/parser"
-    ], function(Map, WebTiledLayer, parser
-    ) {
-      parser.parse();
+    require(["esri/map", "esri/layers/WebTiledLayer", "dojo/parser"],
+            function(Map, WebTiledLayer)
+            {
 
-      ///////////////
+      //////////////////////////
       // User Input Parameters
-      ///////////////
+      ////////////////////////
 
-      const api_key = "Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz"  // Nearmap API Key Goes Here
-      const min_zoom = 16  // Furthest zoom level the user can view
-      const max_zoom = 20  // Closest zoom level the user can view
-      const start_zoom = 17  // Starting Zoom level for the Web Map
-      const lat_lon = [-97.740180, 30.267610], // [Lat, Lon] for Location: ex: Austin, TX
+      const api_key = "Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz";  // "NEARMAP_API_KEY_GOES_HERE"
+      const origin_zoom = 17;  // Starting Zoom level for the Web Map
+      const origin = [-97.75,30.269135]; // [Lat, Lon] for Location: ex: Austin, TX
+      const min_zoom = 17;  // Lowest resolution zoom level the user can view
+      const max_zoom = 24;  // Highest resolution zoom level the user can view
 
-              map = new Map("map", {
-                center: lat_lon,
-                zoom: start_zoom,
-                minZoom: min_zoom,
-                maxZoom: max_zoom-1,
-                basemap: "topo-vector"
-              });
+      ///////////
+      // Script
+      /////////
+
+      map = new Map("map", {
+        center: origin,
+        zoom: origin_zoom-1,
+        minZoom: min_zoom-1,
+        maxZoom: max_zoom-1,
+        basemap: "topo-vector"
+      });
 
       // TODO: Assess zoom levels https://docs.nearmap.com/pages/viewpage.action?pageId=11206698
       const cycleMap = new WebTiledLayer(`https://api.nearmap.com/tiles/v3/Vert/{level}/{col}/{row}.img?apikey=${api_key}`, {
