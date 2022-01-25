@@ -1,17 +1,17 @@
 
-var olMap = null;
-var layerType = 'Vert';
-var availableSurveys = [];
-var dropdownElement = null;
-var selectedDisplayElement = null;
-var displayedDisplayElement = null;
-var northElement = null;
-var westElement = null;
-var southElement = null;
-var eastElement = null;
-var vertElement = null;
+let olMap = null;
+let layerType = 'Vert';
+let availableSurveys = [];
+let dropdownElement = null;
+let selectedDisplayElement = null;
+let displayedDisplayElement = null;
+let northElement = null;
+let westElement = null;
+let southElement = null;
+let eastElement = null;
+let vertElement = null;
 
-var selectedSurvey = {
+let selectedSurvey = {
   survey: null,
   get value() {
     return this.survey;
@@ -22,7 +22,7 @@ var selectedSurvey = {
   }
 };
 
-var displayedSurvey = {
+let displayedSurvey = {
   survey: null,
   get value() {
     return this.survey;
@@ -33,7 +33,7 @@ var displayedSurvey = {
   }
 };
 
-var TILE_SIZES = {
+const TILE_SIZES = {
   North: [256, 192],
   East: [192, 256],
   South: [256, 192],
@@ -49,9 +49,9 @@ function toViewRotation(heading) {
  * Provides Nearmap tile URL whenever for selected survey date and layer type
  */
 function tileUrlFunction(tileCoord) {
-  var z = tileCoord[0];
-  var x = tileCoord[1];
-  var y = tileCoord[2];
+  let z = tileCoord[0];
+  let x = tileCoord[1];
+  let y = tileCoord[2];
 
   return urlTemplate(z, x, y, displayedSurvey.value, layerType);
 }
@@ -60,7 +60,7 @@ function tileUrlFunction(tileCoord) {
  * Provides Nearmap tile rotation mechanism
  */
 function tileLoadFunction(imageTile, src) {
-  var img = imageTile.getImage();
+  let img = imageTile.getImage();
 
   fetchImageData(src)
     .then(function(imgData) {
@@ -111,17 +111,17 @@ function createLayer() {
  * Above coordinates are internally called [west, south, east, north].
  */
 function getBounds() {
-  var view = olMap.getView();
-  var projection = view.getProjection();
-  var extent = view.calculateExtent(olMap.getSize());
-  var extent = ol.proj.transformExtent(extent, projection, ol.proj.get('EPSG:4326'));
-  var west = extent[0];
-  var south = extent[1];
-  var east = extent[2];
-  var north = extent[3];
+  let view = olMap.getView();
+  let projection = view.getProjection();
+  let extent = view.calculateExtent(olMap.getSize());
+  extent = ol.proj.transformExtent(extent, projection, ol.proj.get('EPSG:4326'));
+  let west = extent[0];
+  let south = extent[1];
+  let east = extent[2];
+  let north = extent[3];
 
   return { north: north, east: east, west: west, south: south };
-};
+}
 
 /**
  * Called when the selected survey date does not exist in the current list of available survey dates.
@@ -131,15 +131,15 @@ function getBounds() {
  * @param {*} selectedDate       user's selected survey date
  */
 function findClosestDate(surveys, selectedDate) {
-  var selectedDateInMs = selectedDate ? +new Date(selectedDate) : +new Date();
-  var deltaInMs = surveys.map(function(survey) {
-    var surveyDateInMs = +new Date(survey.captureDate);
+  let selectedDateInMs = selectedDate ? +new Date(selectedDate) : +new Date();
+  let deltaInMs = surveys.map(function(survey) {
+    let surveyDateInMs = +new Date(survey.captureDate);
     return Math.abs(selectedDateInMs - surveyDateInMs);
   });
 
-  var closestDateInMs = Math.min.apply(null, deltaInMs);
+  let closestDateInMs = Math.min.apply(null, deltaInMs);
   return surveys[deltaInMs.findIndex(function(ms) { return ms === closestDateInMs; })].captureDate;
-};
+}
 
 /**
  * @param {*} availableSurveys    available surveys returned by the coverage API
@@ -164,8 +164,8 @@ function getSurveyDate(availableSurveys, selectedDate) {
  * Fetches Nearmap coverage API.
  */
 function fetchCoverage() {
-  var bounds = getBounds(olMap);
-  var coverageUrl = coverageUrlTemplate(bounds.east, bounds.west, bounds.north, bounds.south);
+  let bounds = getBounds(olMap);
+  let coverageUrl = coverageUrlTemplate(bounds.east, bounds.west, bounds.north, bounds.south);
 
   return fetch(coverageUrl)
     .then(function(response) {
@@ -188,10 +188,10 @@ function refreshTiles() {
  * Refreshes the map tiles whenever projection changes.
  */
 function refreshView() {
-  var currentProject = olMap.getView().getProjection();
-  var currentCenter = olMap.getView().getCenter();
-  var zoom = olMap.getView().getZoom();
-  var center = ol.proj.toLonLat(currentCenter, currentProject);
+  let currentProject = olMap.getView().getProjection();
+  let currentCenter = olMap.getView().getCenter();
+  let zoom = olMap.getView().getZoom();
+  let center = ol.proj.toLonLat(currentCenter, currentProject);
 
   return updateSurveys().then(function(){
       olMap.setView(createView(zoom, center));
@@ -225,7 +225,7 @@ function updateDropDown() {
 
   // Creates the content of options for select element
   availableSurveys.forEach(function(survey) {
-    var optionElement = document.createElement('option');
+    let optionElement = document.createElement('option');
     optionElement.setAttribute('value', survey.captureDate);
     optionElement.innerText = survey.captureDate;
 
@@ -237,8 +237,8 @@ function updateDropDown() {
 }
 
 /**
- * Extracts out surveys which contain corresponding tile type 
- * 
+ * Extracts out surveys which contain corresponding tile type
+ *
  * e.g
  *  resources:
  *    tiles:
@@ -249,7 +249,7 @@ function updateDropDown() {
  *      4: {id: "100-24dc01fc-b95e-11e7-b261-4395884423ee", scale: 20, type: "East"}
  */
 function getAvailableSurveyDates(response) {
-  var surveys = response && response.surveys ? response.surveys : [];
+  let surveys = response && response.surveys ? response.surveys : [];
 
   return surveys.filter(function(survey) {
     return (survey.resources.tiles || [])

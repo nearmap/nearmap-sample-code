@@ -3,7 +3,7 @@
  * https://docs.nearmap.com/display/ND/Tile+API
  */
 function urlTemplate(z, x, y, survey, layer) {
-  var until = '';
+  let until = '';
   if (survey) {
     until = '&until=' + survey;
   }
@@ -11,7 +11,7 @@ function urlTemplate(z, x, y, survey, layer) {
   return 'https://api.nearmap.com/tiles/v3/' +
     layer + '/' + z + '/' + x + '/' + y +
     '.img?tertiary=satellite&apikey=' + DEMO_API_KEY + until;
-};
+}
 
 /**
  *  Documentation for this Nearmap API:

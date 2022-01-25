@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+  <title>Web tiled</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/3.38/dijit/themes/nihilo/nihilo.css">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.38/esri/css/esri.css">
+  <style>
+    html, body, #map {
+      height: 100%; width: 100%;
+      margin: 0; padding: 0;
+    }
+    body{
+      background-color: #fff; overflow:hidden;
+      font-family: sans-serif;
+    }
+    #header {
+      padding: 4px 15px 4px 0;
+      background-color: #F2F2EC;
+      color: #575757;
+      font-size: 16pt;
+      text-align: right;
+      font-weight: bold;
+      height:30px;
+    }
+
+  </style>
+
+  <script src="https://js.arcgis.com/3.28/"></script>
+  <script>
+
+    require(["esri/map", "esri/layers/WebTiledLayer", "dojo/parser"],
+            function(Map, WebTiledLayer)
+            {
+
+      //////////////////////////
+      // User Input Parameters
+      ////////////////////////
+
+      const api_key = "Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz";  // "NEARMAP_API_KEY_GOES_HERE"
+      const origin_zoom = 17;  // Starting Zoom level for the Web Map
+      const origin = [-97.742,30.265]; // [Lat, Lon] for Location: ex: Austin, TX
+      const min_zoom = 17;  // Lowest resolution zoom level the user can view
+      const max_zoom = 24;  // Highest resolution zoom level the user can view
+
+      ///////////
+      // Script
+      /////////
+
+      map = new Map("map", {
+        center: origin,
+        zoom: origin_zoom-1,
+        minZoom: min_zoom-1,
+        maxZoom: max_zoom-1,
+        basemap: "topo-vector"
+      });
+
+      // TODO: Assess zoom levels https://docs.nearmap.com/pages/viewpage.action?pageId=11206698
+      const cycleMap = new WebTiledLayer(`https://api.nearmap.com/tiles/v3/Vert/{level}/{col}/{row}.img?apikey=${api_key}`, {
+        "copyright": 'Maps © <a href="https://nearmap.com">Nearmap</a>',
+        displayLevels: Array.from(Array(max_zoom+1).keys()), // Nearmap Tile Allowed Zoom Levels
+      });
+      map.addLayer(cycleMap);
+    });
+  </script>
+</head>
+<body class="nihilo">
+<div id="mainWindow"
+     data-dojo-type="dijit/layout/BorderContainer"
+     data-dojo-props="design:'headline',gutters:false"
+     style="width: 100%; height: 100%; margin: 0;">
+  <div id="header"
+       data-dojo-type="dijit/layout/ContentPane"
+       data-dojo-props="region:'top'">
+    Nearmap Tile API Example
+
+  </div>
+  <div id="map" class="shadow"
+       data-dojo-type="dijit/layout/ContentPane"
+       data-dojo-props="region:'center'">
+  </div>
+</div>
+</body>
+</html>
