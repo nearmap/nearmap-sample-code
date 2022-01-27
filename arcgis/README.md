@@ -7,6 +7,7 @@ Test & Interact with these Samples Live on CodePin:
 - Tile API:
   - [Nearmap Tile API | ArcGIS JavaScript SDK 4.21 (2D + 3D)](https://codepen.io/geoffhtaylor3d/pen/PojVvjd)
   - [Nearmap Tiles API | ArcGIS JavaScript SDK 4.21 (2D Only)](https://codepen.io/geoffhtaylor3d/pen/ExvaGqg)
+  - [Nearmap Tiles API | ArcGIS JavaScript SDK 4.22 (Swipe)](https://codepen.io/geoffhtaylor3d/pen/gOXbXoV)
   - [Nearmap Tiles API | ArcGIS JavaScript SDK 3.36 (2D Only)](https://codepen.io/geoffhtaylor3d/pen/MWvYZXM)
 - WMS API:
   - [Nearmap WMS API | ArcGIS JavaScript SDK 4.21 (2D + 3D)](https://codepen.io/geoffhtaylor3d/pen/XWgGRGp)
