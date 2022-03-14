@@ -19,11 +19,13 @@ function urlTemplate(z, x, y, survey, layer) {
  */
 function coverageUrlTemplate(east, west, north, south) {
   return 'https://api.nearmap.com/coverage/v2/poly/' +
-    west + ',' + north + ',' +
-    east + ',' + north + ',' +
-    east + ',' + south + ',' +
-    west + ',' + south + ',' +
-    west + ',' + north +
-    '?apikey=' + DEMO_API_KEY +
-    '&limit=1000';
+      west + ',' + north + ',' +
+      east + ',' + north + ',' +
+      east + ',' + south + ',' +
+      west + ',' + south + ',' +
+      west + ',' + north +
+      '?apikey=' + DEMO_API_KEY +
+      '&since=' + SINCE +
+      '&until=' + UNTIL +
+      '&limit=1000';
 }

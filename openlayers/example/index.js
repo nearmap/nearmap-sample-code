@@ -76,7 +76,7 @@ function tileLoadFunction(imageTile, src) {
 }
 
 /**
- * Create Openlayers projection with coresponding rotation and projection
+ * Create Openlayers projection with corresponding rotation and projection
  */
 function createView(zoom, center) {
   zoom = zoom || ZOOM;
@@ -93,7 +93,7 @@ function createView(zoom, center) {
 }
 
 /**
- * Create Openlayers tileLayer with coresponding tileSize and projection
+ * Create Openlayers tileLayer with corresponding tileSize and projection
  */
 function createLayer() {
   return new ol.layer.Tile({
