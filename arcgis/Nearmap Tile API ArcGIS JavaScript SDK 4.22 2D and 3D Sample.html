@@ -7,9 +7,9 @@
 />
 <!--
  ArcGIS API for JavaScript, https://js.arcgis.com
- Learn more abolut Nearmap WMTS and TMS here: https://docs.nearmap.com/display/ND/INTEGRATIONS
+ Learn more about Nearmap Tile API here: https://docs.nearmap.com/display/ND/Tile+API
  -->
-<title>Nearmap/ArcGIS API for JavaScript TMS API Integration Sample</title>
+<title>Nearmap/ArcGIS API for JavaScript 2D & 3D Tile API Integration Sample</title>
 
 <style>
     html,
@@ -25,9 +25,9 @@
 
 <link
         rel="stylesheet"
-        href="https://js.arcgis.com/4.21/esri/themes/light/main.css"
+        href="https://js.arcgis.com/4.22/esri/themes/light/main.css"
 />
-<script src="https://js.arcgis.com/4.21/"></script>
+<script src="https://js.arcgis.com/4.22/"></script>
 
 <script>
     require([
@@ -51,11 +51,15 @@
         // User Input Parameters
         ////////////////////
         const api_key = "Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz"  // "NEARMAP_API_KEY_GOES_HERE"
+        const direction = 'Vert'; // Options: 'Vert', 'North', // Note: awaiting fix from esri to support E, W, S
         const view_type = "Scene" // Select between 3d "Scene" or 2d "Map" viewers
         const origin = [-97.75,30.269135];  // [Lat, Lon] for Location: ex: Austin, TX
         const origin_zoom = 17;  // Starting Zoom level for the Web Map
         let nearmap_min_zoom = 17;  // Nearmap Imagery Lowest resolution zoom level the user can view
         const nearmap_max_zoom = 24;  // Nearmap Imagery Highest resolution zoom level the user can view
+        const opacity = 1.0; // Range of 0.1 to 1.0
+        const blend_mode = null; // See available blend modes here: https://doc.arcgis.com/en/arcgis-online/create-maps/use-blend-modes-mv.htm
+        // blend_mode values "average"|"color-burn"|"color-dodge"|"color"|"darken"|"destination-atop"|"destination-in"|"destination-out"|"destination-over"|"difference"|"exclusion"|"hard-light"|"hue"|"invert"|"lighten"|"lighter"|"luminosity"|"minus"|"multiply"|"normal"|"overlay"|"plus"|"reflect"|"saturation"|"screen"|"soft-light"|"source-atop"|"source-in"|"source-out"|"vivid-light"|"xor"
 
         ///////////
         // Script
@@ -102,9 +106,11 @@
         // Create a WebTileLayer for Nearmap imagery.
         // We are using tileinfo we created earlier.
         const nearmap_wtl = new WebTileLayer({
-            urlTemplate: `https://api.nearmap.com/tiles/v3/Vert/{level}/{col}/{row}.img?apikey=${api_key}`,
+            urlTemplate: `https://api.nearmap.com/tiles/v3/${direction}/{level}/{col}/{row}.img?apikey=${api_key}`,
             copyright: "Nearmap",
             tileInfo: tileInfo,
+            opacity: opacity,
+            blendMode: blend_mode
         });
 
         const map = new Map({
