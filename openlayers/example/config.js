@@ -8,6 +8,6 @@ const MAX_ZOOM = 24;
 
 const ZOOM = 13;
 
-const SINCE = "";
+let SINCE = "";
 
-const UNTIL = "";
+let UNTIL = "";
