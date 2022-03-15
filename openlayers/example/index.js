@@ -11,6 +11,14 @@ let southElement = null;
 let eastElement = null;
 let vertElement = null;
 
+try { UNTIL = new Date(UNTIL).toISOString().slice(0, 10);
+} catch{ UNTIL = new Date().toISOString().slice(0, 10)
+}
+
+try {SINCE = new Date(SINCE).toISOString().slice(0, 10);
+} catch {SINCE = new Date("2001-01-01").toISOString().slice(0, 10);
+}
+
 let selectedSurvey = {
   survey: null,
   get value() {
