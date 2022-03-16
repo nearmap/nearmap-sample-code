@@ -7,9 +7,9 @@
   />
   <!--
    ArcGIS API for JavaScript, https://js.arcgis.com
-   Learn more abolut Nearmap WMS here: https://docs.nearmap.com/display/ND/INTEGRATIONS
+   Learn more abolut Nearmap WMTS here: https://docs.nearmap.com/display/ND/WMTS+Integration
    -->
-  <title>Nearmap/ArcGIS API for JavaScript WMS API Integration Sample</title>
+  <title>Nearmap/ArcGIS API for JavaScript WMTS API Integration Sample</title>
 
   <style>
     html,
@@ -33,10 +33,10 @@
       "esri/Map",
       "esri/views/MapView",
       "esri/views/SceneView",
-      "esri/layers/WMSLayer",
+      "esri/layers/WMTSLayer",
       "esri/Basemap",
       "esri/geometry/SpatialReference"
-    ], (Map, MapView, SceneView, WMSLayer, Basemap, SpatialReference) => {
+    ], (Map, MapView, SceneView, WMTSLayer) => {
 
       // User Input Variables
       const api_key = "Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz";  // "NEARMAP_API_KEY_GOES_HERE"
@@ -51,18 +51,18 @@
       const blend_mode = null; // See available blend modes here: https://doc.arcgis.com/en/arcgis-online/create-maps/use-blend-modes-mv.htm
       // blend_mode values "average"|"color-burn"|"color-dodge"|"color"|"darken"|"destination-atop"|"destination-in"|"destination-out"|"destination-over"|"difference"|"exclusion"|"hard-light"|"hue"|"invert"|"lighten"|"lighter"|"luminosity"|"minus"|"multiply"|"normal"|"overlay"|"plus"|"reflect"|"saturation"|"screen"|"soft-light"|"source-atop"|"source-in"|"source-out"|"vivid-light"|"xor"
 
-      // Script
-      const sr = new SpatialReference({wkid: spatial_reference})
-
-      let wmsLayer = new WMSLayer({
+      let wmsLayer = new WMTSLayer({
         visible: true,
-        url: `https://api.nearmap.com/wms/v1/latest/apikey/${api_key}`,
-        copyright: "Nearmap",
-        spatialReference: sr,
+        url: `https://us0.nearmap.com/maps/api/wmts/v1/apikey/${api_key}`, // URL Differs for US + Canada -vs- AU + NZ https://docs.nearmap.com/display/ND/WMTS+Integration
+        copyright: 'Nearmap',
+        title: 'Nearmap',
         minScale: nearmap_min_scale,
         maxScale: nearmap_max_scale,
-        opacity: opacity,
-        blendMode: blend_mode
+        activeLayer: {
+          id: 'nearmap.com'
+        },
+        blendMode: blend_mode,
+        opacity: opacity
       });
 
       const map = new Map({

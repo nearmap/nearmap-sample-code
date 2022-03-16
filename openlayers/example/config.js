@@ -7,3 +7,7 @@ const MIN_ZOOM = 0;
 const MAX_ZOOM = 24;
 
 const ZOOM = 13;
+
+let SINCE = "";
+
+let UNTIL = "";

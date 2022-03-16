@@ -11,6 +11,14 @@ let southElement = null;
 let eastElement = null;
 let vertElement = null;
 
+try { UNTIL = new Date(UNTIL).toISOString().slice(0, 10);
+} catch{ UNTIL = new Date().toISOString().slice(0, 10)
+}
+
+try {SINCE = new Date(SINCE).toISOString().slice(0, 10);
+} catch {SINCE = new Date("2001-01-01").toISOString().slice(0, 10);
+}
+
 let selectedSurvey = {
   survey: null,
   get value() {
@@ -76,7 +84,7 @@ function tileLoadFunction(imageTile, src) {
 }
 
 /**
- * Create Openlayers projection with coresponding rotation and projection
+ * Create Openlayers projection with corresponding rotation and projection
  */
 function createView(zoom, center) {
   zoom = zoom || ZOOM;
@@ -93,7 +101,7 @@ function createView(zoom, center) {
 }
 
 /**
- * Create Openlayers tileLayer with coresponding tileSize and projection
+ * Create Openlayers tileLayer with corresponding tileSize and projection
  */
 function createLayer() {
   return new ol.layer.Tile({
