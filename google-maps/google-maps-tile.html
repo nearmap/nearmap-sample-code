@@ -22,25 +22,27 @@
     <div id="map"></div>
 
     <script>
-    var TILE_URL = 'https://api.nearmap.com/tiles/v3/Vert/{z}/{x}/{y}.jpeg?apikey=Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz&tertiary=satellite';
+    const apikey='';
+    const TILE_URL = `https://api.nearmap.com/tiles/v3/Vert/{z}/{x}/{y}.jpeg?apikey=${apikey}&tertiary=satellite`;
+    const layerID = 'Nearmap Tile API';
 
-    var map;
-    var mapEl;
-    var layer;
-    var layerID = 'Nearmap Tile API';
-
+    if (!apikey) {
+      alert("API key is not set, please update the code to use your API key.");
+      debugger; //remove this line in production
+    }
+    
     window.initMap = function() {
       // Select the element with id="map".
-      mapEl = document.querySelector('#map');
+      const mapEl = document.querySelector('#map');
       
       // Create a new map.
-      map = new google.maps.Map(mapEl, {
+      const map = new google.maps.Map(mapEl, {
         center: new google.maps.LatLng(30.267610, -97.740180),
         zoom: 21
       });
       
       // Create a tile layer, configured to fetch tiles from TILE_URL.
-      layer = new google.maps.ImageMapType({
+      const layer = new google.maps.ImageMapType({
         name: layerID,
         getTileUrl: function(coord, zoom) {
           var url = TILE_URL
@@ -60,7 +62,7 @@
     };
     </script>
     
-    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key=AIzaSyAvBhAqWr2AE2AR_DxkvbravXpXoQrZUXA"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?callback=initMap&key="></script>
     
   </body>
 </html>
