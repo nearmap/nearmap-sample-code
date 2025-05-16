@@ -1,4 +1,4 @@
-const DEMO_API_KEY = 'Yzc2MjEzMWUtY2Q4YS00NTM2LTgyMDgtMDljZjI2YTdhMTMz';
+const DEMO_API_KEY = '';
 
 const CENTER = [138.595637, -34.915302];
 
