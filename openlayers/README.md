@@ -17,8 +17,8 @@ Below you'll find a complete working example showcasing OpenLayers with Nearmap 
       OpenLayers cdn distributable from:
       https://openlayers.org/en/latest/doc/quickstart.html
     -->
-    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.1.1/build/ol.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.1.1/css/ol.css" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/ol@v10.5.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v10.5.0/ol.css" type="text/css">
   </head>
 
   <body>
