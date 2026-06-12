@@ -2,6 +2,15 @@
 
 In these samples, we connect to ArcGIS 3.3x and 4.x Javascript APIs using the Nearmap Tile, WMS, and WMTS API's
 
+## Timeline and Panorama sample
+
+[Nearmap Tile API ArcGIS JavaScript SDK 4.34 Timeline and Panorama Sample.html](<Nearmap Tile API ArcGIS JavaScript SDK 4.34 Timeline and Panorama Sample.html>) shows Nearmap vertical and panorama (oblique) imagery across multiple survey dates, similar to the [OpenLayers advanced example](../openlayers/example/):
+
+- A TimeSlider widget lists the survey dates available for the current view (from the Coverage API); picking a date reloads the imagery for that survey.
+- Direction buttons switch between `Vertical`, `North`, `East`, `South` and `West` imagery. A custom `BaseTileLayer` rotates the oblique tiles onto square Web Mercator tiles and the view is rotated to match the heading.
+
+Note: oblique imagery appears stretched 4/3 along the look direction compared to Nearmap's native viewer; ArcGIS cannot represent Nearmap's non-square oblique tile grid exactly.
+
 
 Test & Interact with these Samples Live on CodePin:
 - Tile API:
