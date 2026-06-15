@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <!--
+ ArcGIS Maps SDK for JavaScript, https://js.arcgis.com
+ Learn more about Nearmap Tile API here: https://docs.nearmap.com/display/ND/Tile+API
+ Learn more about Nearmap Coverage API here: https://docs.nearmap.com/display/ND/Coverage+API
+
+ This sample shows Nearmap vertical and panorama (oblique) imagery across multiple
+ survey dates:
+  - A TimeSlider widget lists the survey dates available for the current view, fetched
+    from the Coverage API. Picking a date reloads the tiles with the `until` parameter.
+  - Direction buttons switch between Vert, North, East, South and West imagery. The
+    reusable NearmapTileLayer (see NearmapTileLayer.js) renders Nearmap's non-square
+    panorama tiles, and the view is rotated to match the heading.
+
+ ============================================================================
+ SECURITY: API KEY IS EXPOSED IN THE BROWSER
+ ============================================================================
+ This sample puts the Nearmap API key directly in client-side JavaScript, so it is
+ sent in every tile and Coverage API request and is visible to anyone who opens the
+ browser developer tools. That is fine for a local demo, but it is NOT safe for a
+ public-facing application.
+
+ For a public-facing app, reduce the exposure of the key:
+  - Add referrer restrictions to your API key so it only works when requested from
+    your own domain(s). This is available on all Nearmap plans; see "Referrer
+    restrictions" in https://help.nearmap.com/kb/articles/666-manage-api-applications
+    and/or
+  - Route Nearmap tile and Coverage requests through a server-side proxy that you
+    control and that injects the key, so the key never leaves your server.
+ ============================================================================
+
+ Other notes:
+  - Panorama imagery is stretched 4/3 along the look direction compared to Nearmap's
+    native viewer (see NearmapTileLayer.js for why).
+  - 2D MapView only; SceneView does not support view rotation.
+  - Naming uses camelCase throughout for internal consistency; the older arcgis samples
+    in this repo use snake_case for their parameter block.
+ -->
+    <title>Nearmap/ArcGIS Maps SDK for JavaScript Timeline and Panorama Sample</title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #timeSliderDiv {
+            width: 600px;
+            max-width: 80vw;
+        }
+
+        #directionDiv {
+            background: #ffffff;
+            padding: 6px;
+            text-align: center;
+        }
+
+        #directionDiv button {
+            margin: 3px;
+            padding: 4px 10px;
+            border: 1px solid #6e6e6e;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        /* Active state is signalled by more than colour (fill + bold + heavier border)
+           so it is distinguishable without relying on colour perception. */
+        #directionDiv button[aria-pressed="true"] {
+            background: #0079c1;
+            color: #ffffff;
+            border-color: #00598d;
+            font-weight: 700;
+        }
+
+        /* Visible keyboard focus indicator for accessibility. */
+        #directionDiv button:focus-visible {
+            outline: 3px solid #e0a800;
+            outline-offset: 1px;
+        }
+
+        /* Small status/error banner. */
+        #statusDiv {
+            display: none;
+            background: #b30000;
+            color: #ffffff;
+            padding: 6px 10px;
+            font-family: sans-serif;
+            font-size: 13px;
+            border-radius: 2px;
+        }
+
+        /* Standing note reminding readers the key is exposed. */
+        #noteDiv {
+            background: rgba(0, 0, 0, 0.75);
+            color: #ffffff;
+            padding: 6px 10px;
+            font-family: sans-serif;
+            font-size: 12px;
+            max-width: 320px;
+            border-radius: 2px;
+        }
+
+        #keyMessage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 0 24px;
+            box-sizing: border-box;
+            font-family: sans-serif;
+            font-size: 16px;
+            text-align: center;
+            color: #b30000;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.34/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.34/"></script>
+    <!-- Reusable Nearmap custom tile layer (vertical + panorama). -->
+    <script src="NearmapTileLayer.js"></script>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/BaseTileLayer",
+            "esri/layers/support/TileInfo",
+            "esri/layers/support/LOD",
+            "esri/geometry/Point",
+            "esri/geometry/SpatialReference",
+            "esri/geometry/support/webMercatorUtils",
+            "esri/widgets/TimeSlider",
+            "esri/core/reactiveUtils"
+        ], function (Map, MapView, BaseTileLayer, TileInfo, LOD, Point, SpatialReference, webMercatorUtils, TimeSlider, reactiveUtils) {
+
+            //////////////////////
+            // User Input Parameters
+            ////////////////////
+            const apiKey = "";  // "NEARMAP_API_KEY_GOES_HERE" - see the SECURITY note in the header comment
+            const origin = [-97.75, 30.269135];  // [Lon, Lat] for Location: ex: Austin, TX
+            const originZoom = 17;  // Starting zoom level for the map
+            const minZoom = 12;  // Lowest (most zoomed-out) Nearmap zoom level the user can view
+            const maxZoom = 24;  // Highest (most zoomed-in) Nearmap zoom level the user can view
+            const coverageSince = "";  // Earliest survey date to show, e.g. "2020-01-01". Empty for no limit.
+            const coverageUntil = "";  // Latest survey date to show, e.g. "2024-12-31". Empty for today.
+            const opacity = 1.0;  // Range of 0.1 to 1.0
+            const blendMode = null;  // See https://doc.arcgis.com/en/arcgis-online/create-maps/use-blend-modes-mv.htm
+
+            // Skip the Coverage API query when the view spans more than this many degrees
+            // of longitude, to avoid sending a near-world-sized polygon.
+            const COVERAGE_MAX_SPAN_DEG = 3;
+
+            ///////////
+            // Script
+            /////////
+
+            // Without an API key nothing will load, so stop with a clear on-page message
+            // rather than rendering a blank map.
+            if (!apiKey) {
+                document.getElementById("viewDiv").innerHTML =
+                    '<div id="keyMessage">API key is not set. Add your Nearmap API key to the ' +
+                    '<code>apiKey</code> parameter in this file. See the SECURITY note at the top ' +
+                    'of the source before deploying publicly.</div>';
+                return;
+            }
+
+            // The view is rotated so each direction's imagery reads naturally (e.g. South
+            // imagery is shown south-up). Headings match those in NearmapTileLayer.js.
+            const HEADINGS = { Vert: 0, North: 0, East: 90, South: 180, West: 270 };
+
+            // Normalise the coverage window: until defaults to today, since to well before
+            // the first survey.
+            const since = toIsoDate(coverageSince) || "2001-01-01";
+            const until = toIsoDate(coverageUntil) || toDateString(new Date());
+
+            // By default the ArcGIS SDK only goes to zoom level 19. Adding Level Of Detail
+            // (LOD) entries up to maxZoom lets us show Nearmap's higher-resolution imagery.
+            // Taken from https://gist.github.com/stdavis/6e5c721d50401ddbf126
+            const tileSize = 256;
+            const earthCircumference = 40075016.685568;
+            const inchesPerMeter = 39.37;
+            const initialResolution = earthCircumference / tileSize;
+            const lods = [];
+            for (let zoom = minZoom; zoom <= maxZoom; zoom++) {
+                const resolution = initialResolution / Math.pow(2, zoom);
+                lods.push(new LOD({
+                    level: zoom,
+                    scale: resolution * 96 * inchesPerMeter,
+                    resolution: resolution
+                }));
+            }
+
+            const tileInfo = new TileInfo({
+                dpi: 72,
+                format: "jpg",
+                lods: lods,
+                origin: new Point({ x: -20037508.342787, y: 20037508.342787 }),
+                spatialReference: SpatialReference.WebMercator,
+                size: [tileSize, tileSize]
+            });
+
+            const NearmapTileLayer = createNearmapTileLayer(BaseTileLayer);
+            const nearmapLayer = new NearmapTileLayer({
+                apiKey: apiKey,
+                copyright: "Nearmap",
+                tileInfo: tileInfo,
+                opacity: opacity,
+                blendMode: blendMode
+            });
+
+            const map = new Map({ layers: [nearmapLayer] });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                // With custom LODs starting at minZoom the view treats zoom as an index
+                // into the LOD array, hence the subtraction.
+                zoom: originZoom - minZoom,
+                center: origin,
+                constraints: { lods: lods }  // bounds the zoom range to minZoom..maxZoom
+            });
+
+            //////////////////////
+            // Status banner + standing security note
+            ////////////////////
+            const statusDiv = document.getElementById("statusDiv");
+            view.ui.add("statusDiv", "top-leading");
+            view.ui.add("noteDiv", "bottom-trailing");
+
+            const showError = (message) => {
+                statusDiv.textContent = message;
+                statusDiv.style.display = "block";
+            };
+            const clearError = () => {
+                statusDiv.style.display = "none";
+            };
+
+            //////////////////////
+            // Coverage API helpers (pure functions)
+            ////////////////////
+            const coverage = {
+                /**
+                 * Builds a Coverage API polygon URL from a geographic extent.
+                 * https://docs.nearmap.com/display/ND/Coverage+API
+                 */
+                buildUrl: (extent) =>
+                    "https://api.nearmap.com/coverage/v2/poly/" +
+                    `${extent.xmin},${extent.ymax},` +
+                    `${extent.xmax},${extent.ymax},` +
+                    `${extent.xmax},${extent.ymin},` +
+                    `${extent.xmin},${extent.ymin},` +
+                    `${extent.xmin},${extent.ymax}` +
+                    `?apikey=${apiKey}&since=${since}&until=${until}&limit=1000`,
+
+                /** Surveys that contain a tile of the given direction. */
+                surveysForDirection: (response, direction) => {
+                    const surveys = (response && response.surveys) || [];
+                    return surveys.filter((survey) =>
+                        ((survey.resources && survey.resources.tiles) || [])
+                            .some((tile) => tile.type === direction));
+                },
+
+                /** Closest available survey date (in either direction) to a target date. */
+                findClosestDate: (surveys, targetDate) => {
+                    const targetMs = targetDate ? +new Date(targetDate) : Date.now();
+                    let closest = surveys[0].captureDate;
+                    let smallestDelta = Infinity;
+                    surveys.forEach((survey) => {
+                        const delta = Math.abs(targetMs - +new Date(survey.captureDate));
+                        if (delta < smallestDelta) {
+                            smallestDelta = delta;
+                            closest = survey.captureDate;
+                        }
+                    });
+                    return closest;
+                },
+
+                /** Keeps the user's selected date when available, else the closest. */
+                pickSurveyDate: function (surveys, selectedDate) {
+                    if (surveys.length === 0) {
+                        return null;
+                    }
+                    if (surveys.some((survey) => survey.captureDate === selectedDate)) {
+                        return selectedDate;
+                    }
+                    return this.findClosestDate(surveys, selectedDate);
+                }
+            };
+
+            //////////////////////
+            // Timeline controller (owns the TimeSlider)
+            ////////////////////
+            const timeline = createTimeline(TimeSlider, reactiveUtils, "timeSliderDiv");
+            view.ui.add("timeSliderDiv", "bottom-leading");
+
+            //////////////////////
+            // Application state + wiring
+            ////////////////////
+            let selectedSurvey = null;   // date string the user picked, kept across map moves
+            let displayedSurvey = null;  // date string currently shown on the map
+            let coverageRequestId = 0;   // guards against out-of-order Coverage responses
+
+            const refreshTiles = () => nearmapLayer.refresh();
+
+            const applyDisplayedSurvey = (date) => {
+                displayedSurvey = date;
+                nearmapLayer.until = date;
+                refreshTiles();
+            };
+
+            /**
+             * Fetches Coverage for the current extent, updates the survey list and the
+             * TimeSlider, and refreshes the tiles only when the displayed survey date
+             * changes. (A direction change refreshes tiles separately, since the imagery
+             * changes even when the date does not.)
+             */
+            const updateSurveys = () => {
+                const extent = webMercatorUtils.webMercatorToGeographic(view.extent);
+                if (!extent || extent.xmax - extent.xmin > COVERAGE_MAX_SPAN_DEG) {
+                    // View too large; leave the current state and wait for the user to zoom in.
+                    return Promise.resolve();
+                }
+
+                const requestId = ++coverageRequestId;
+                return fetch(coverage.buildUrl(extent))
+                    .then((response) => response.json())
+                    .then((response) => {
+                        if (requestId !== coverageRequestId) {
+                            return;  // a newer request superseded this one
+                        }
+                        clearError();
+
+                        const surveys = coverage.surveysForDirection(response, nearmapLayer.direction);
+                        const previousDisplayed = displayedSurvey;
+                        displayedSurvey = coverage.pickSurveyDate(surveys, selectedSurvey);
+                        timeline.setSurveys(surveys, displayedSurvey);
+
+                        if (displayedSurvey !== previousDisplayed) {
+                            applyDisplayedSurvey(displayedSurvey);
+                        }
+                    })
+                    .catch(() => {
+                        showError("Imagery coverage is currently unavailable. Try moving the map.");
+                    });
+            };
+
+            // User picked a date on the TimeSlider.
+            timeline.onSelect((date) => {
+                selectedSurvey = date;
+                applyDisplayedSurvey(date);
+            });
+
+            // Refresh the available surveys whenever the map stops moving.
+            reactiveUtils.watch(() => view.stationary, (stationary) => {
+                if (stationary) {
+                    updateSurveys();
+                }
+            });
+
+            //////////////////////
+            // Panorama direction buttons
+            ////////////////////
+            const directionDiv = document.getElementById("directionDiv");
+            view.ui.add(directionDiv, "top-trailing");
+
+            directionDiv.querySelectorAll("button").forEach((button) => {
+                button.addEventListener("click", (evt) => {
+                    const direction = evt.currentTarget.value;
+                    if (direction === nearmapLayer.direction) {
+                        return;
+                    }
+
+                    directionDiv.querySelectorAll("button").forEach((b) => {
+                        b.setAttribute("aria-pressed", String(b === evt.currentTarget));
+                    });
+
+                    nearmapLayer.direction = direction;
+                    view.rotation = (360 - HEADINGS[direction]) % 360;
+
+                    // Refresh now so the new direction's imagery loads immediately (it does
+                    // not depend on Coverage). updateSurveys then re-checks which survey
+                    // dates exist for this direction and only refreshes again if the
+                    // displayed date has to change.
+                    refreshTiles();
+                    updateSurveys();
+                });
+            });
+
+            view.when(() => updateSurveys());
+
+            //////////////////////
+            // Shared date helpers
+            ////////////////////
+            function toDateString(date) {
+                return date.toISOString().slice(0, 10);
+            }
+
+            // Returns "YYYY-MM-DD" for a parseable input, or "" when the input is empty/invalid.
+            function toIsoDate(value) {
+                if (!value) {
+                    return "";
+                }
+                const date = new Date(value);
+                return isNaN(date.getTime()) ? "" : toDateString(date);
+            }
+        });
+
+        //////////////////////
+        // Timeline controller factory
+        ////////////////////
+        // Owns the TimeSlider and translates user date picks into an onSelect callback.
+        // It avoids a re-entrancy flag by tracking the date it last reflected and
+        // ignoring timeExtent changes that match it (which is exactly what programmatic
+        // updates produce).
+        function createTimeline(TimeSlider, reactiveUtils, containerId) {
+            const slider = new TimeSlider({
+                container: containerId,
+                mode: "instant",
+                timeVisible: false,
+                loop: false,
+                disabled: true
+            });
+
+            let reflectedDate = null;       // date string currently shown on the slider
+            let selectHandler = () => {};
+
+            const toDateString = (date) => date.toISOString().slice(0, 10);
+
+            reactiveUtils.watch(() => slider.timeExtent, (timeExtent) => {
+                if (!timeExtent || !timeExtent.start) {
+                    return;
+                }
+                const date = toDateString(timeExtent.start);
+                if (date === reflectedDate) {
+                    return;  // programmatic update (setSurveys) or no-op
+                }
+                reflectedDate = date;
+                selectHandler(date);
+            });
+
+            return {
+                widget: slider,
+
+                onSelect(callback) {
+                    selectHandler = callback;
+                },
+
+                /** Rebuilds the stops and selects displayedDate without firing onSelect. */
+                setSurveys(surveys, displayedDate) {
+                    if (!surveys.length) {
+                        slider.disabled = true;
+                        reflectedDate = null;
+                        return;
+                    }
+
+                    const dates = surveys
+                        .map((survey) => new Date(survey.captureDate))
+                        .sort((a, b) => a - b);
+
+                    slider.disabled = false;
+                    slider.fullTimeExtent = { start: dates[0], end: dates[dates.length - 1] };
+                    slider.stops = { dates: dates };
+
+                    // Set reflectedDate before assigning timeExtent so the watcher no-ops.
+                    reflectedDate = displayedDate;
+                    const date = new Date(displayedDate);
+                    slider.timeExtent = { start: date, end: date };
+                }
+            };
+        }
+    </script>
+</head>
+
+<body>
+<div id="viewDiv"></div>
+<div id="directionDiv" role="group" aria-label="Imagery direction">
+    <div><button type="button" value="North" aria-pressed="false">North</button></div>
+    <div>
+        <button type="button" value="West" aria-pressed="false">West</button>
+        <button type="button" value="Vert" aria-pressed="true">Vertical</button>
+        <button type="button" value="East" aria-pressed="false">East</button>
+    </div>
+    <div><button type="button" value="South" aria-pressed="false">South</button></div>
+</div>
+<div id="statusDiv" role="alert"></div>
+<div id="noteDiv">Demo only: the Nearmap API key is exposed in the browser. Do not deploy this
+    as-is publicly. See the security note in the page source.</div>
+<div id="timeSliderDiv"></div>
+</body>
+
+</html>
