@@ -15,7 +15,7 @@
     from the Coverage API. Picking a date reloads the tiles with the `until` parameter.
   - Direction buttons switch between Vert, North, East, South and West imagery. The
     reusable NearmapTileLayer (see NearmapTileLayer.js) renders Nearmap's non-square
-    oblique tiles, and the view is rotated to match the heading.
+    panorama tiles, and the view is rotated to match the heading.
 
  ============================================================================
  SECURITY: API KEY IS EXPOSED IN THE BROWSER
@@ -35,7 +35,7 @@
  ============================================================================
 
  Other notes:
-  - Oblique imagery is stretched 4/3 along the look direction compared to Nearmap's
+  - Panorama imagery is stretched 4/3 along the look direction compared to Nearmap's
     native viewer (see NearmapTileLayer.js for why).
   - 2D MapView only; SceneView does not support view rotation.
   - Naming uses camelCase throughout for internal consistency; the older arcgis samples
@@ -123,7 +123,7 @@
     </style>
     <link rel="stylesheet" href="https://js.arcgis.com/4.34/esri/themes/light/main.css">
     <script src="https://js.arcgis.com/4.34/"></script>
-    <!-- Reusable Nearmap custom tile layer (vertical + oblique). -->
+    <!-- Reusable Nearmap custom tile layer (vertical + panorama). -->
     <script src="NearmapTileLayer.js"></script>
     <script>
         require([
