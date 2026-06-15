@@ -11,7 +11,7 @@ In these samples, we connect to ArcGIS 3.3x and 4.x Javascript APIs using the Ne
 
 Notes:
 - Oblique imagery appears stretched 4/3 along the look direction compared to Nearmap's native viewer; ArcGIS cannot represent Nearmap's non-square oblique tile grid exactly.
-- The sample embeds the API key in client-side code for demo simplicity. This exposes the key to anyone using the page, so it is not safe for a public-facing deployment. Proxy Nearmap requests through a server that injects the key, or use a domain-restricted key. See the security note at the top of the HTML source.
+- The sample embeds the API key in client-side code for demo simplicity. This exposes the key to anyone using the page, so it is not safe for a public-facing deployment. To reduce exposure, add [referrer restrictions](https://help.nearmap.com/kb/articles/666-manage-api-applications) to your API key (available on all Nearmap plans) so it only works from your own domains, and/or proxy Nearmap requests through a server that injects the key. See the security note at the top of the HTML source.
 
 
 Test & Interact with these Samples Live on CodePin:

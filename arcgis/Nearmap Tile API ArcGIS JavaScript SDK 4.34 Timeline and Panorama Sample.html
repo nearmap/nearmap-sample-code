@@ -25,11 +25,13 @@
  browser developer tools. That is fine for a local demo, but it is NOT safe for a
  public-facing application.
 
- For a public-facing app, do NOT ship the key to the browser. Instead:
+ For a public-facing app, reduce the exposure of the key:
+  - Add referrer restrictions to your API key so it only works when requested from
+    your own domain(s). This is available on all Nearmap plans; see "Referrer
+    restrictions" in https://help.nearmap.com/kb/articles/666-manage-api-applications
+    and/or
   - Route Nearmap tile and Coverage requests through a server-side proxy that you
-    control and that injects the key, so the key never leaves your server; and/or
-  - Use a Nearmap API key that is restricted to your application's domain/referrer,
-    if your Nearmap plan supports it.
+    control and that injects the key, so the key never leaves your server.
  ============================================================================
 
  Other notes:
